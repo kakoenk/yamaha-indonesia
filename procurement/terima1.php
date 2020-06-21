@@ -278,14 +278,21 @@ $dataNamaModel = isset($_POST['txtNamaModel']) ? $_POST['txtNamaModel'] : '';
 		<td><?php echo $tmpData['nm_model']?></td>
 		<td><?php echo $tmpData['nm_bagian']?></td>
 		<td align="center"><?php echo $tmpData['jumlah'];?></td>
+
+
+
 		
 
 
-		<td align="center">
-			<?php if (!$_SESSION['SES_PENGGUNA']):?>
-				<a onclick="modalValidasi('<?php echo $tmpData[no_pengiriman]?>','<?php echo $tmpData[kd_barang]?>','<?php echo $tmpData[nm_barang]?>','<?php echo $tmpData[jumlah];?>','<?php echo $tmpData[jumlah_terima];?>')" data-toggle="modal" data-target=".modal-tambah<?php echo $noPengiriman; ?>"><button class="btn btn-warning">validasi</button></a>
-				 
+		<td align="center">			 
+				<?php if ($tmpData[jumlah_terima]==""):?>
+				<a onclick="modalValidasi('<?php echo $tmpData[no_pengiriman]?>','<?php echo $tmpData[kd_barang]?>','<?php echo $tmpData[nm_barang]?>','<?php echo $tmpData[jumlah];?>','<?php echo $tmpData[jumlah_terima];?>')" data-toggle="modal" data-target=".modal-tambah<?php echo $noPengiriman; ?>"><button class="btn btn-warning">validasi</button></a> 
 				</td>
+				 <?php else: ?>
+				<label>ok</label>
+				<?php if ($tmpData[jumlah_terima]=$tmpData[jumlah]):?>
+					<label>u</label>
+				<?php endif;?>
 				<?php endif;?>
 
 		<td></td>
