@@ -51,7 +51,7 @@ $dataBarang = isset ($_POST['cmbBarang']) ? $_POST['cmbBarang'] : '';
 
 if(isset($_POST['btnSimpan'])){
 	 // untuk menerima parsing data dari form
-	  	$noPenerimaan 		= $_POST[no_penerimaan];
+	  	$noPenerimaan 		= $_POST['no_penerimaan'];
 	$txtTanggal 		= $_POST['txtTanggal'];
 	 
 	$cmbPengirim	 	= $_POST['cmbPengirim'];
@@ -115,7 +115,7 @@ if(isset($_POST['btnSimpan'])){
 	
 }
 $noTransaksi = buatKode("penerimaan","PE");
-$noPengiriman= isset($_POST[no_pengiriman]) ? $_POST[no_pengiriman] : '';
+$noPengiriman= isset($_POST['no_pengiriman']) ? $_POST['no_pengiriman'] : '';
 $tglTransaksi = isset($_POST['txtTanggal']) ? $_POST['txtTanggal'] : date ('d-m-Y');
 $dataPengirim = isset($_POST['cmbPengirim']) ? $_POST['cmbPengirim'] : '';
 $dataPenerima = isset($_POST['cmbPenerima']) ? $_POST['cmbPenerima'] : '';
@@ -163,12 +163,13 @@ $dataNamaModel = isset($_POST['txtNamaModel']) ? $_POST['txtNamaModel'] : '';
 }
 </script>
 <script language="javascript">
-	function modalValidasi(noPengiriman,kode,nama,jumlah,terima){
+	function modalValidasi(noPengiriman,kode,nama,jumlah,terima,keterangan){
 		document.getElementById('noPengiriman').value = noPengiriman;
 		document.getElementById('edtKode').value = kode;
 		document.getElementById('edtNamaBarang').value = nama;
 		document.getElementById('edtJumlah').value = jumlah;
 		document.getElementById('edtTerima').value = terima;
+		document.getElementById('keterangan').value = keterangan;
 	}
 </script>
 
@@ -211,6 +212,11 @@ $dataNamaModel = isset($_POST['txtNamaModel']) ? $_POST['txtNamaModel'] : '';
 			<input type="text" name="edtTerima" id="edtTerima" class="form-control" required="required"data-parsley-error-message="field ini harus diisi">
 			</input>
 		</div>
+		<div class="form-group">
+			<label class="control-label">Keterangan<span class="required">*</span></label>
+			<textarea type="text" name="keterangan" id="keterangan" class="form-control" required="required"data-parsley-error-message="field ini harus diisi">
+			</textarea>
+		</div>
 		</div>
 
 						<div class="modal-footer">
@@ -233,10 +239,11 @@ $dataNamaModel = isset($_POST['txtNamaModel']) ? $_POST['txtNamaModel'] : '';
 			<th width="150"><strong>No Pengiriman</strong></th>	
 			<th width="150"><strong>Kode barang</strong></th>		
 			<th width="400"><strong>Nama Barang</strong></th>
-			<th width="150"><strong>Model</strong></th>
-			<th width="420" align="center"><strong>Pengirim</strong></th>
+			<th width="70"><strong>Model</strong></th>
+			<th width="250" align="center"><strong>Pengirim</strong></th>
 			<th width="70" align="center"><strong>Jumlah</strong></th>
-			<th width="100" align="center">Tools</th>
+			<th width="70" align="center"><strong>Jumlah Terima</strong></th>
+			<th width="150" align="center">Validasi</th>
 			<th width="1">id</th>
 		</tr>
 	</thead>
@@ -253,7 +260,7 @@ $dataNamaModel = isset($_POST['txtNamaModel']) ? $_POST['txtNamaModel'] : '';
 	// $tmpSql ="SELECT a.no_pengiriman, a.kd_barang, a.nm_barang, b.nm_model, a.jumlah, a.validasi, c.nm_bagian FROM tmp_penerimaan a 
 	//  		LEFT JOIN model b ON b.kd_model=a.kd_model
 	//  		LEFT JOIN bagian c ON c.kd_bagian=a.pengirim WHERE penerima='$dataPenerima'";
-	$tmpSql ="SELECT a.no_pengiriman, a.kd_barang, d.nm_model, a.nm_barang, a.jumlah, b.nm_bagian, a.jumlah, a.penerima FROM tmp_penerimaan a 
+	$tmpSql ="SELECT a.no_pengiriman, a.kd_barang, d.nm_model, a.nm_barang, a.jumlah, b.nm_bagian, a.jumlah, a.penerima, a.jumlah_terima, a.keterangan FROM tmp_penerimaan a 
 		LEFT JOIN bagian b ON b.kd_bagian=a.pengirim 
 		LEFT JOIN barang c ON c.kd_barang=a.kd_barang 
 		LEFT JOIN model d ON d.kd_model=c.kd_model $filterSQL";
@@ -264,7 +271,9 @@ $dataNamaModel = isset($_POST['txtNamaModel']) ? $_POST['txtNamaModel'] : '';
 		$ID = $tmpData['id'];
 		$qtyItem= $qtyItem + $tmpData['jumlah'];
 		$subTotal= $tmpData['jumlah'];
+		$subTerima= $tmpData['jumlah_terima'];
 		$totalBelanja= $totalBelanja + $subTotal;
+		$totalTerima= $totalTerima + $subTerima;
 		$nomor++;
 		?>
 
@@ -278,22 +287,26 @@ $dataNamaModel = isset($_POST['txtNamaModel']) ? $_POST['txtNamaModel'] : '';
 		<td><?php echo $tmpData['nm_model']?></td>
 		<td><?php echo $tmpData['nm_bagian']?></td>
 		<td align="center"><?php echo $tmpData['jumlah'];?></td>
+		<td align="center"><?php echo $tmpData['jumlah_terima'];?></td>
 
 
 
 		
 
-
-		<td align="center">			 
-				<?php if ($tmpData[jumlah_terima]==""):?>
-				<a onclick="modalValidasi('<?php echo $tmpData[no_pengiriman]?>','<?php echo $tmpData[kd_barang]?>','<?php echo $tmpData[nm_barang]?>','<?php echo $tmpData[jumlah];?>','<?php echo $tmpData[jumlah_terima];?>')" data-toggle="modal" data-target=".modal-tambah<?php echo $noPengiriman; ?>"><button class="btn btn-warning">validasi</button></a> 
+<td align="center">			 
+				<?php if ($tmpData['jumlah_terima']>="1"):?>
+					<?php if ($tmpData['jumlah']==$tmpData['jumlah_terima']) :?>
+					 <label>Valid</label>
+					 <?php else :?>
+					 	<label>Tidak Valid</label>
+					 	<?php endif;?>
 				</td>
 				 <?php else: ?>
-				<label>ok</label>
-				<?php if ($tmpData[jumlah_terima]=$tmpData[jumlah]):?>
-					<label>u</label>
+				 	<a onclick="modalValidasi('<?php echo $tmpData['no_pengiriman']?>','<?php echo $tmpData['kd_barang']?>','<?php echo $tmpData['nm_barang']?>','<?php echo $tmpData['jumlah'];?>','<?php echo $tmpData['jumlah_terima'];?>','<?php echo $tmpData['keterangan'];?>')" data-toggle="modal" data-target=".modal-tambah<?php echo $noPengiriman; ?>"><button class="btn btn-warning">validasi</button></a> 
+				 
+				
 				<?php endif;?>
-				<?php endif;?>
+		</td>
 
 		<td></td>
 	</tr>
@@ -304,6 +317,7 @@ $dataNamaModel = isset($_POST['txtNamaModel']) ? $_POST['txtNamaModel'] : '';
 			<td colspan="5" align="right"><b> TOTAL BARANG : </b></td>
 			<td align="center">&nbsp;</td>
 			<td align="right"><strong><?php echo $totalBelanja; ?></strong></td>
+			<td align="right"><strong><?php echo $totalTerima; ?></strong></td>
 			<td align="center">&nbsp;</td>
 		</tr>
 	</tfoot>
@@ -377,7 +391,7 @@ $dataNamaModel = isset($_POST['txtNamaModel']) ? $_POST['txtNamaModel'] : '';
 		var tbl = $('#datatable').DataTable({
 		"columnDefs": [
 		{"orderable": false, "targets": 4 },
-		{ "targets": 8, "visible": false, "searchable": false }
+		{ "targets": 9, "visible": false, "searchable": false }
 		],
 		"paging": true,
 		"searching": true,
